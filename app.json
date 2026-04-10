@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "BizFinance Tracker",
+    "slug": "bizfinance-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "bizfinance",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bizfinance.tracker"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0F172A"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.bizfinance.tracker"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png",
+      "name": "BizFinance Tracker",
+      "shortName": "BizFinance",
+      "description": "Track your small business finances - income, expenses, invoices, and clients",
+      "lang": "en",
+      "themeColor": "#0F172A",
+      "backgroundColor": "#0F172A",
+      "startUrl": "/",
+      "display": "standalone",
+      "orientation": "portrait",
+      "scope": "/"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0F172A"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
