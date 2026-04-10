@@ -27,6 +27,7 @@ export default function InvoicesScreen() {
 
   // Modal state
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [statusModalInvoice, setStatusModalInvoice] = useState<Invoice | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   // Edit state
@@ -147,11 +148,8 @@ export default function InvoicesScreen() {
   };
 
   const showStatusOptions = (invoice: Invoice) => {
-    const statuses = ['draft', 'sent', 'approved', 'paid', 'overdue'];
-    webAlert(t('changeStatus'), invoice.invoice_number,
-      [...statuses.map((s) => ({ text: t(s), onPress: () => handleStatusChange(invoice, s) })),
-      { text: t('cancel'), style: 'cancel' }]
-    );
+    // Instead of webAlert, we use our custom Status Picker Modal!
+    setStatusModalInvoice(invoice);
   };
 
   const handleDelete = (invoice: Invoice) => {
@@ -183,9 +181,35 @@ export default function InvoicesScreen() {
   };
 
   const exportPDF = async (invoice: Invoice) => {
-    const html = `
-    <html><head><meta charset="utf-8"><style>
+    
+    // ==========================================
+    // ÁREA DE DESIGN ACESSÍVEL PARA O UTILIZADOR
+    // ==========================================
+    // Aqui podes alterar a estética de todo o PDF gerado. 
+    // Muda cores (ex: #6C63FF), tamanhos(ex: 32px), bordas, margens.
+    const customCSS = `
       body { font-family: 'Helvetica Neue', sans-serif; padding: 40px; color: #1a1a2e; }
+      .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+      .invoice-title { font-size: 32px; font-weight: bold; color: #6C63FF; } /* Cor do título FATURA */
+      .invoice-number { font-size: 14px; color: #666; margin-top: 4px; }
+      .status { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; color: white; background: ${getStatusColor(invoice.status)}; }
+      .client-box { background: #f8f8fc; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
+      .client-name { font-size: 18px; font-weight: 600; }
+      .client-detail { font-size: 14px; color: #666; margin-top: 4px; }
+      table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+      th { background: #6C63FF; color: white; padding: 12px 16px; text-align: left; font-size: 13px; } /* Cabeçalho Tabela */
+      th:last-child, td:last-child { text-align: right; }
+      td { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 14px; }
+      .summary { margin-top: 20px; text-align: right; }
+      .summary-row { display: flex; justify-content: flex-end; gap: 40px; padding: 8px 0; font-size: 14px; color: #666; }
+      .total-row { font-size: 20px; font-weight: bold; color: #1a1a2e; border-top: 2px solid #6C63FF; padding-top: 12px; margin-top: 8px; }
+      .notes { background: #f8f8fc; border-radius: 12px; padding: 16px; margin-top: 30px; font-size: 13px; color: #666; }
+      .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #999; }
+    `;
+
+    // Isto injeta o design (CSS) e o conteúdo da Fatura (Javascript variables) diretamente!
+    const html = `
+    <html><head><meta charset="utf-8"><style>${customCSS}</style></head><body>
       .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
       .invoice-title { font-size: 32px; font-weight: bold; color: #6C63FF; }
       .invoice-number { font-size: 14px; color: #666; margin-top: 4px; }
@@ -556,6 +580,30 @@ export default function InvoicesScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />}
           contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false} />
       )}
+
+      {/* Custom Status Picker Modal */}
+      <Modal visible={!!statusModalInvoice} transparent animationType="fade" onRequestClose={() => setStatusModalInvoice(null)}>
+        <TouchableOpacity style={styles.statusModalOverlay} activeOpacity={1} onPress={() => setStatusModalInvoice(null)}>
+          <View style={[styles.statusModalContent, { backgroundColor: theme.card }]}>
+            <Text style={[styles.statusModalTitle, { color: theme.text }]}>{t('changeStatus')}</Text>
+            {['draft', 'sent', 'approved', 'paid', 'overdue'].map((s) => (
+              <TouchableOpacity key={s} 
+                style={[styles.statusModalOption, { borderBottomColor: theme.border }]} 
+                onPress={() => {
+                  if (statusModalInvoice) handleStatusChange(statusModalInvoice, s);
+                  setStatusModalInvoice(null);
+                }}
+              >
+                <View style={[styles.statusDot, { backgroundColor: getStatusColor(s) }]} />
+                <Text style={[styles.statusModalOptionText, { color: theme.text }]}>{t(s)}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={styles.statusModalCancel} onPress={() => setStatusModalInvoice(null)}>
+              <Text style={{ color: theme.danger, fontWeight: '600', fontSize: 16 }}>{t('cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Invoice Modal: Preview or Edit */}
       <Modal visible={!!selectedInvoice} animationType="slide" transparent onRequestClose={() => { if (isEditing) setIsEditing(false); else setSelectedInvoice(null); }}>
