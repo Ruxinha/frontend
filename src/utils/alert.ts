@@ -10,13 +10,10 @@ export const webAlert = (
     
     // Check if it's a simple confirm vs action sheet
     if (buttons.length <= 2 || buttons.some(b => b.style === 'cancel' || b.style === 'destructive')) {
-      const isConfirmed = window.confirm(confirmText);
-      if (isConfirmed) {
-        const confirmBtn = buttons.find(b => b.style === 'destructive' || b.style === 'default' || (b.text && b.text.toLowerCase() !== 'cancel'));
-        if (confirmBtn && confirmBtn.onPress) confirmBtn.onPress();
-      } else {
-        const cancelBtn = buttons.find(b => b.style === 'cancel' || (b.text && b.text.toLowerCase() === 'cancel'));
-        if (cancelBtn && cancelBtn.onPress) cancelBtn.onPress();
+      // By User Request: Bypass the confirmation popup entirely on Web to avoid browser blockers
+      const confirmBtn = buttons.find(b => b.style === 'destructive' || b.style === 'default' || (b.text && b.text.toLowerCase() !== 'cancel' && b.text.toLowerCase() !== 'cancelar'));
+      if (confirmBtn && confirmBtn.onPress) {
+        confirmBtn.onPress();
       }
       return;
     } else {
