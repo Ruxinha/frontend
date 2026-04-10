@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { DARK_THEME, LIGHT_THEME, TRANSLATIONS, ThemeColors } from '../theme/colors';
+import { useStore } from '../store/useStore';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -124,6 +125,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.removeItem('auth_user');
     setToken(null);
     setUser(null);
+    useStore.setState({
+      clients: [],
+      transactions: [],
+      categories: [],
+      invoices: [],
+      summary: null,
+    });
   };
 
   const updateSettings = async (settings: UserSettings) => {
